@@ -3,8 +3,8 @@
  * File: OSICT_Firmware.ino
  * Description: High-resolution carbon-based resistive matrix with
  *              time-multiplexed localized scanning over 4 physical segments.
- * License: GNU GPLv3
- * 
+ * License: MIT
+ *
  * Hardware:
  * - MCU: Arduino Nano (or any ATmega328P)
  * - Mux: CD4052 / 74HC4051 (2-bit selector)
@@ -12,7 +12,12 @@
  * - Pen: Conductive stylus connected to A0
  */
 
-// ==================== PIN DEFINITIONS ====================
+// ==================== CONFIGURATION ====================
+
+// Enable binary mode output in addition to ASCII
+#define ENABLE_BINARY_MODE 1
+// Protocol version for binary packets
+#define PROTO_VERSION 1
 
 // Mux Control Pins (2-bit selector)
 const int MUX_S0 = 6;  // Bit 0 (LSB)
@@ -90,12 +95,20 @@ void loop() {
   delayMicroseconds(20);
   int localY = scanY();
   
-  // STEP 4: Send data over USB
+  // Pen flag: 1 = touching
+  uint8_t penFlag = 1;
+  
+  // STEP 4: Send data over USB (ASCII)
   Serial.print(detectedSegment);
   Serial.print(":");
   Serial.print(localX);
   Serial.print(":");
   Serial.println(localY);
+
+#if ENABLE_BINARY_MODE
+  // Also send binary packet with protocol version and checksum
+  sendBinaryPacket(detectedSegment, localX, localY, penFlag);
+#endif
   
   delay(5); // 200 Hz polling rate
 }
@@ -160,6 +173,42 @@ int filteredRead(int pin) {
     delayMicroseconds(10);
   }
   return sum / SAMPLES;
+}
+
+// ==================== BINARY PACKET SUPPORT ====================
+
+/**
+ * Binary packet format (extended):
+ * [0xAA][PROTO_VER][X_H][X_L][Y_H][Y_L][SEG][PEN][CHECKSUM]
+ * CHECKSUM = (PROTO_VER + X_H + X_L + Y_H + Y_L + SEG + PEN) & 0xFF
+ */
+void sendBinaryPacket(uint8_t segment, int x, int y, uint8_t pen) {
+  uint8_t x_h = (x >> 8) & 0xFF;
+  uint8_t x_l = x & 0xFF;
+  uint8_t y_h = (y >> 8) & 0xFF;
+  uint8_t y_l = y & 0xFF;
+  uint8_t seg = segment & 0xFF;
+  uint8_t proto = (uint8_t)PROTO_VERSION;
+
+  uint16_t sum = 0;
+  sum += proto;
+  sum += x_h;
+  sum += x_l;
+  sum += y_h;
+  sum += y_l;
+  sum += seg;
+  sum += pen;
+  uint8_t checksum = sum & 0xFF;
+
+  Serial.write(0xAA);
+  Serial.write(proto);
+  Serial.write(x_h);
+  Serial.write(x_l);
+  Serial.write(y_h);
+  Serial.write(y_l);
+  Serial.write(seg);
+  Serial.write(pen);
+  Serial.write(checksum);
 }
 
 // ==================== END OF CODE ====================
