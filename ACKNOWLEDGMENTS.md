@@ -1,28 +1,35 @@
-# الاعترافات والمساهمات (Acknowledgments)
+# Acknowledgments
 
-## مساهمة الذكاء الاصطناعي في هذا المشروع
+## Project Lead
 
-تم تطوير مشروع "اللوح الكربوني التفاعلي مفتوح المصدر" (OSICT) بالتعاون بين المطور البشري وأدوات الذكاء الاصطناعي المتقدمة. هذا القسم يوثق طبيعة هذه المساهمة بشفافية.
+- **walidddhony-rgb** - Project concept, design, and development.
 
-### 1. نموذج Gemini من Google
+## Inspirations and References
 
-قدم نموذج Gemini، من خلال واجهته التفاعلية، دعماً أساسياً في:
+### Hardware and Sensing
+- [Boogie Board](https://myboogieboard.com) - Inspiration for bistable LCD writing film technology.
+- Arduino and ESP32 open-source communities for microcontroller platforms.
+- CD4052 / 74HC4051 multiplexer datasheets and application notes.
 
-- **الصياغة الهندسية الأولية:** المساعدة في ترجمة الأفكار الخام إلى مصطلحات فيزيائية وهندسية دقيقة.
-- **سد الثغرات التقنية:** تقديم حلول منهجية للتحديات المطروحة مثل مشكلة الدقة، واقتراح استخدام خوارزمية المسح التبادلي (Time-Multiplexing)، وشريحة التبديل التناظري (Mux).
-- **التنظيم والهيكلة:** تنظيم مسار التطوير في مراحل منطقية، من المبدأ الفيزيائي إلى التصميم الهندسي والبرمجي.
-- **الصياغة القانونية:** المساعدة في صياغة المطالبات الأولية لبراءة الاختراع والوثائق العلمية.
-- **المراجعة والتقييم:** تقييم الفكرة من منظور علمي وهندسي، واقتراح مسارات للتطوير المستقبلي.
+### Software and Visualization
+- [PyVista](https://pyvista.org) - 3D visualization toolkit (for potential mesh integration).
+- [PySerial](https://pyserial.readthedocs.io) - Serial communication library for Python.
 
-### 2. نموذج DeepSeek
+### Research and Theory
+- Research on carbon-based resistive touch sensors and flexible tactile sensor arrays.
+- Studies on piezoresistive films and large-scale flexible sensor matrices.
 
-لعب نموذج DeepSeek دوراً مكملاً ومهماً في:
+## Tools Used
 
-- **توليد الشيفرة البرمجية التفصيلية:** كتابة الكود المتقدم لكل من الميكروكنترولر (Arduino) وتطبيق الاستقبال (Python) مع التعليقات الواضحة.
-- **هيكلة المستودع:** اقتراح هيكل شامل للمشروع على GitHub يتناسب مع معايير المجتمع مفتوح المصدر.
-- **التوثيق الشامل:** المساعدة في إعداد ملفات README، ودليل المساهمة (CONTRIBUTING)، ومواصفات المواد، والمقترح الأكاديمي.
+- **Arduino IDE** / PlatformIO - Firmware development.
+- **KiCad / Fritzing** - Circuit schematic design.
+- **Python** - Host software and data visualization.
+- **Git and GitHub** - Version control and project hosting.
+
+## Community
+
+Thank you to all future contributors who will help improve this project!
 
 ---
-**ملاحظة هامة:** هذه الأدوات ساعدت في تسريع عملية التطوير والتنظيم، ولكن الأفكار الجوهرية، والهدف المجتمعي للمشروع، وقرارات التصميم النهائية هي من صنع المطور البشري. دور الذكاء الاصطناعي هنا هو دور "معزز ومطور" (Accelerator and Developer)، وليس "منشئاً مبتكراً" (Originator).
 
-نحن نؤمن بأن الشفافية في توثيق استخدام الذكاء الاصطناعي تعزز من مصداقية المشاريع البحثية والعلمية.
+*If you believe any credit is missing, please open an issue or contact the maintainer.*
