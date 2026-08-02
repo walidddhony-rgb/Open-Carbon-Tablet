@@ -1,3 +1,9 @@
+/*
+ * OSICT - Open-Source Interactive Carbon Tablet
+ * Copyright (c) 2026 walidddhony-rgb
+ * License: MIT (https://opensource.org/licenses/MIT)
+ */
+
 #ifndef SCANNER_H
 #define SCANNER_H
 
