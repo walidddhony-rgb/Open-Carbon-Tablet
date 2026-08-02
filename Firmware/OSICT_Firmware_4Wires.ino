@@ -1,3 +1,10 @@
+/*
+ * OSICT - Open-Source Interactive Carbon Tablet
+ * File: OSICT_Firmware_4Wires.ino
+ * License: MIT
+ * Copyright (c) 2026 walidddhony-rgb
+ */
+
 /**
  * Alternative Firmware for 4-Wire Version
  * Uses mathematical virtual segmentation (no Mux needed)
