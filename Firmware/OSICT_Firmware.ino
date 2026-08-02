@@ -16,8 +16,8 @@
 
 // Enable binary mode output in addition to ASCII
 #define ENABLE_BINARY_MODE 1
-// Protocol version for binary packets
-#define PROTO_VERSION 1
+// Protocol version for binary packets (2 = extended with seq + timestamp)
+#define PROTO_VERSION 2
 
 // Mux Control Pins (2-bit selector)
 const int MUX_S0 = 6;  // Bit 0 (LSB)
@@ -36,6 +36,7 @@ const int PEN_PIN = A0;
 
 const int SAMPLES = 8;           // Number of samples for noise filtering
 const int DEBOUNCE_THRESHOLD = 15; // Minimum reading to consider pen touching
+static uint16_t seqCounter = 0;   // Packet sequence number
 
 // ==================== SETUP ====================
 
@@ -106,8 +107,10 @@ void loop() {
   Serial.println(localY);
 
 #if ENABLE_BINARY_MODE
-  // Also send binary packet with protocol version and checksum
-  sendBinaryPacket(detectedSegment, localX, localY, penFlag);
+  // Also send binary packet with protocol version, seq and timestamp and checksum
+  uint16_t seq = seqCounter++;
+  uint32_t ts = (uint32_t)millis(); // timestamp in milliseconds since boot
+  sendBinaryPacket(seq, ts, detectedSegment, localX, localY, penFlag);
 #endif
   
   delay(5); // 200 Hz polling rate
@@ -175,23 +178,45 @@ int filteredRead(int pin) {
   return sum / SAMPLES;
 }
 
-// ==================== BINARY PACKET SUPPORT ====================
+// ==================== BINARY PACKET SUPPORT (EXTENDED) ====================
 
 /**
- * Binary packet format (extended):
- * [0xAA][PROTO_VER][X_H][X_L][Y_H][Y_L][SEG][PEN][CHECKSUM]
- * CHECKSUM = (PROTO_VER + X_H + X_L + Y_H + Y_L + SEG + PEN) & 0xFF
+ * Extended binary packet format:
+ * [0xAA]
+ * [PROTO (1)]
+ * [SEQ_H][SEQ_L] (2)
+ * [TS_3][TS_2][TS_1][TS_0] (4) -- millis() big-endian
+ * [X_H][X_L] (2)
+ * [Y_H][Y_L] (2)
+ * [SEG] (1)
+ * [PEN] (1)
+ * [CHECKSUM] (1)
+ *
+ * Total bytes after 0xAA: 14
+ * CHECKSUM = sum of all payload bytes (PROTO..PEN) & 0xFF
  */
-void sendBinaryPacket(uint8_t segment, int x, int y, uint8_t pen) {
+void sendBinaryPacket(uint16_t seq, uint32_t ts, uint8_t segment, int x, int y, uint8_t pen) {
+  uint8_t proto = (uint8_t)PROTO_VERSION;
+  uint8_t seq_h = (seq >> 8) & 0xFF;
+  uint8_t seq_l = seq & 0xFF;
+  uint8_t ts_b3 = (ts >> 24) & 0xFF;
+  uint8_t ts_b2 = (ts >> 16) & 0xFF;
+  uint8_t ts_b1 = (ts >> 8) & 0xFF;
+  uint8_t ts_b0 = ts & 0xFF;
   uint8_t x_h = (x >> 8) & 0xFF;
   uint8_t x_l = x & 0xFF;
   uint8_t y_h = (y >> 8) & 0xFF;
   uint8_t y_l = y & 0xFF;
   uint8_t seg = segment & 0xFF;
-  uint8_t proto = (uint8_t)PROTO_VERSION;
 
   uint16_t sum = 0;
   sum += proto;
+  sum += seq_h;
+  sum += seq_l;
+  sum += ts_b3;
+  sum += ts_b2;
+  sum += ts_b1;
+  sum += ts_b0;
   sum += x_h;
   sum += x_l;
   sum += y_h;
@@ -202,6 +227,12 @@ void sendBinaryPacket(uint8_t segment, int x, int y, uint8_t pen) {
 
   Serial.write(0xAA);
   Serial.write(proto);
+  Serial.write(seq_h);
+  Serial.write(seq_l);
+  Serial.write(ts_b3);
+  Serial.write(ts_b2);
+  Serial.write(ts_b1);
+  Serial.write(ts_b0);
   Serial.write(x_h);
   Serial.write(x_l);
   Serial.write(y_h);
